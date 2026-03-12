@@ -40,6 +40,7 @@ module axis_pixels #(
   logic [ROWS-1:0][WORD_WIDTH-1:0] dw_ro_m_data;
   logic [ROWS+EDGE_WORDS-1:0][WORD_WIDTH-1:0] i_data, dw_re_m_data, dw_m_data_r;
 
+   // alex_axis_adapter_any module changes the width of an AXI Stream interface
   alex_axis_adapter_any #(
     .S_DATA_WIDTH  (AXI_WIDTH),
     .M_DATA_WIDTH  (WORD_WIDTH*(ROWS+EDGE_WORDS)),
@@ -102,7 +103,7 @@ module axis_pixels #(
     .m_axis_tuser  ()
   );
 
-  // State machine
+  // State machine 
   enum {SET, PASS , BLOCK} state;
 
   logic en_config, en_shift, en_copy, en_kh, en_copy_r, last_kh, last_kh_r, last_clk_kh, last_clk_kh_r, last_clk_ci, last_clk_w, last_l, last_l_r, m_last_reg, m_last, first_l, first_l_r, first_p;
@@ -121,7 +122,8 @@ module axis_pixels #(
   wire m_last_beat    = m_ready    && m_valid    && m_last;
   wire m_beat         = m_ready    && m_valid;
 
-  always_ff @(posedge aclk `OR_NEGEDGE(aresetn))
+ // state machine logic
+   always_ff @(posedge aclk `OR_NEGEDGE(aresetn))     // `OR_NEGEDGE is macro that provides flexibilty for different targets
     if (!aresetn)                      state <= SET ; 
     else case (state)
       SET   : if (s_valid)             state <= PASS; // During set, read user without giving ready
