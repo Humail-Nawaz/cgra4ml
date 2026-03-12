@@ -1,34 +1,34 @@
 `timescale 1ns/1ps
 `include "defines.svh"
-
 module axis_pixels #(
-  parameter   ROWS               = `ROWS               ,
-              KH_MAX             = `KH_MAX             ,
-              CI_MAX             = `CI_MAX             ,
-              XW_MAX             = `XW_MAX             ,
-              XH_MAX             = `XH_MAX             ,
-              WORD_WIDTH         = `X_BITS             ,
-              RAM_EDGES_DEPTH    = `RAM_EDGES_DEPTH    , 
-              AXI_WIDTH          = `AXI_WIDTH          ,
-              HEADER_WIDTH       = `HEADER_WIDTH       ,
-
+   //parameters from python
+  parameter   ROWS               = `ROWS               ,   // no of pe rows in cgra  
+              KH_MAX             = `KH_MAX             ,   // maximum kernal hieght
+              CI_MAX             = `CI_MAX             ,   // maximum channel input
+              XW_MAX             = `XW_MAX             ,   //maximum image width and  
+              XH_MAX             = `XH_MAX             ,   // height
+              WORD_WIDTH         = `X_BITS             ,   // bit width of each pixel
+              RAM_EDGES_DEPTH    = `RAM_EDGES_DEPTH    ,   // 
+              AXI_WIDTH          = `AXI_WIDTH          ,   // axi data bus width
+              HEADER_WIDTH       = `HEADER_WIDTH       ,   // 
+//derived parameters
   parameter  EDGE_WORDS         =  KH_MAX/2              ,
               IM_SHIFT_REGS      =  ROWS + KH_MAX-1       ,
               BITS_KH            = $clog2(KH_MAX         ),
               BITS_KH2           = $clog2((KH_MAX+1)/2   ),
               BITS_CI            = $clog2(CI_MAX)         ,
-              BITS_XW            = $clog2(XW_MAX)         ,
+              BITS_XW            = $clog2(XW_MAX)         ,    
               BITS_IM_BLOCKS     = $clog2(XH_MAX/ROWS) 
   )(
     input logic aclk, aresetn,
-
-    output logic s_ready,
+     //slave interface for DMA
+    output logic s_ready,         
     input  logic s_valid,
-    input  logic s_last ,
+    input  logic s_last ,         // DMA tells this module that now this is last pixel of current layer
     input  logic [AXI_WIDTH/WORD_WIDTH-1:0][WORD_WIDTH-1:0] s_data,
     input  logic [AXI_WIDTH/WORD_WIDTH-1:0] s_keep,
     input  logic [HEADER_WIDTH:0] s_user,
-
+    // master interface for DMA
     input  logic m_ready,
     output logic m_valid,
     output logic [ROWS -1:0][WORD_WIDTH-1:0] m_data
